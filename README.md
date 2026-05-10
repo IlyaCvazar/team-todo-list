@@ -75,7 +75,7 @@ team-todo-list/
 
 ## 📞 Контакты
 
-По вопросам обращайтесь: [твой Telegram или email]
+По вопросам обращайтесь: [ilaokolelov726@gmail.com]
 
 ## 📄 Лицензия
 
