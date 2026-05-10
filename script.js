@@ -10,12 +10,25 @@ const taskList = document.getElementById('taskList');
 const taskCount = document.getElementById('taskCount');
 const filterButtons = document.querySelectorAll('.filter-btn');
 
+// Загрузка задач из localStorage при старте
+function loadTasks() {
+    const storedTasks = localStorage.getItem('teamTodoTasks');
+    if (storedTasks) {
+        tasks = JSON.parse(storedTasks);
+    }
+}
+loadTasks();
+
+// Сохранение задач в localStorage
+function saveTasks() {
+    localStorage.setItem('teamTodoTasks', JSON.stringify(tasks));
+}
+
 // Функция добавления задачи
 function addTask() {
     const taskText = taskInput.value.trim();
     const assignee = assigneeInput.value.trim();
     
-    // Проверка на пустые поля
     if (taskText === '') {
         alert('Введите текст задачи!');
         return;
@@ -26,7 +39,6 @@ function addTask() {
         return;
     }
     
-    // Создаём объект задачи
     const task = {
         id: Date.now(),
         text: taskText,
@@ -34,23 +46,19 @@ function addTask() {
         completed: false
     };
     
-    // Добавляем в массив
     tasks.push(task);
+    saveTasks();               // сохраняем изменения
     
-    // Очищаем поля ввода
     taskInput.value = '';
     assigneeInput.value = '';
     
-    // Обновляем отображение
     renderTasks();
 }
 
 // Функция отображения задач
 function renderTasks() {
-    // Очищаем список
     taskList.innerHTML = '';
     
-    // Фильтруем задачи
     let filteredTasks = tasks;
     if (currentFilter === 'active') {
         filteredTasks = tasks.filter(task => !task.completed);
@@ -58,7 +66,6 @@ function renderTasks() {
         filteredTasks = tasks.filter(task => task.completed);
     }
     
-    // Создаём элементы для каждой задачи
     filteredTasks.forEach(task => {
         const li = document.createElement('li');
         li.className = 'task-item';
@@ -79,38 +86,38 @@ function renderTasks() {
         taskList.appendChild(li);
     });
     
-    // Обновляем счётчик
     updateCounter();
 }
 
-// Функция переключения статуса задачи
+// Переключение статуса задачи
 function toggleTask(id) {
     const task = tasks.find(t => t.id === id);
     if (task) {
         task.completed = !task.completed;
+        saveTasks();           // сохраняем после изменения статуса
         renderTasks();
     }
 }
 
-// Функция удаления задачи
+// Удаление задачи
 function deleteTask(id) {
     if (confirm('Вы уверены, что хотите удалить эту задачу?')) {
         tasks = tasks.filter(t => t.id !== id);
+        saveTasks();           // сохраняем после удаления
         renderTasks();
     }
 }
 
-// Функция обновления счётчика
+// Обновление счётчика
 function updateCounter() {
     const activeTasks = tasks.filter(t => !t.completed).length;
     taskCount.textContent = `Задач: ${tasks.length} | Активных: ${activeTasks}`;
 }
 
-// Функция установки фильтра
+// Установка фильтра
 function setFilter(filter) {
     currentFilter = filter;
     
-    // Обновляем активную кнопку
     filterButtons.forEach(btn => {
         btn.classList.remove('active');
         if (btn.dataset.filter === filter) {
@@ -124,17 +131,12 @@ function setFilter(filter) {
 // Обработчики событий
 addButton.addEventListener('click', addTask);
 
-// Добавление задачи по нажатию Enter
+// Добавление по Enter
 taskInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        addTask();
-    }
+    if (e.key === 'Enter') addTask();
 });
-
 assigneeInput.addEventListener('keypress', (e) => {
-    if (e.key === 'Enter') {
-        addTask();
-    }
+    if (e.key === 'Enter') addTask();
 });
 
 // Фильтры
@@ -144,5 +146,5 @@ filterButtons.forEach(btn => {
     });
 });
 
-// Инициализация
+// Первый рендер (восстановит сохранённые задачи, если есть)
 renderTasks();
